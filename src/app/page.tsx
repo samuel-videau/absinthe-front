@@ -10,13 +10,19 @@ import { Points, AbsintheSdk } from 'sam-absinthe-sdk';
 export default function Home() {
   const [keyData, setKeyData] = useState<Partial<Key>>();
   const [campaignData, setCampaignData] = useState<Partial<Campaign>>();
-  const [pointData, setPointData] = useState<Partial<Points>>();
-  const [absintheSdk, setAbsintheSdk] = useState<AbsintheSdk | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [pointsForm, setPointsForm] = useState({
+    campaignId: '',
+    apiKey: '',
+    address: '',
+    points: '',
+    eventName: '',
+    metadata: ''
+  });
 
   const isConnected = () => !!userId;
 
@@ -82,6 +88,43 @@ export default function Home() {
     setLoading(false);
   };
 
+  const handlePointsSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+
+    const { campaignId, apiKey, address, points, eventName, metadata } = pointsForm;
+    if (!campaignId || !apiKey || !address || !points || !eventName) return;
+
+    try {
+      const absintheSdk = new AbsintheSdk(apiKey, Number(campaignId));
+      const pointsData = {
+        points: Number(points),
+        address,
+        eventName,
+        metadata: metadata ? JSON.parse(metadata) : undefined
+      };
+      const pointsResponse = await absintheSdk.distribute("points", pointsData);
+      console.log("Points Response:", pointsResponse);
+      setPointsForm({
+        campaignId: pointsForm.campaignId,
+        apiKey: pointsForm.apiKey,
+        address: '',
+        points: '',
+        eventName: '',
+        metadata: ''
+      });
+    } catch (error) {
+      console.error("Failed to add points:", error);
+    }
+
+    setLoading(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setPointsForm(prevState => ({ ...prevState, [name]: value }));
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-100 flex flex-col items-center">
       {loading && (
@@ -129,6 +172,64 @@ export default function Home() {
             >
               Create Key (Full Permissions)
             </button>
+
+            <form onSubmit={handlePointsSubmit} className="mt-4 w-full max-w-md">
+              <div className="flex flex-col space-y-2">
+                <input
+                  type="number"
+                  name="campaignId"
+                  placeholder="Campaign ID"
+                  value={pointsForm.campaignId}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <input
+                  type="text"
+                  name="apiKey"
+                  placeholder="API Key"
+                  value={pointsForm.apiKey}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  value={pointsForm.address}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <input
+                  type="number"
+                  name="points"
+                  placeholder="Number of Points"
+                  value={pointsForm.points}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <input
+                  type="text"
+                  name="eventName"
+                  placeholder="Event Name"
+                  value={pointsForm.eventName}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <textarea
+                  name="metadata"
+                  placeholder="Metadata (JSON)"
+                  value={pointsForm.metadata}
+                  onChange={handleInputChange}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                >
+                  Add Points
+                </button>
+              </div>
+            </form>
           </>
         )}
 
