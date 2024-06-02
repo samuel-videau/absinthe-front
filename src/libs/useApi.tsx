@@ -26,7 +26,7 @@ export const useApi = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+      });
     return response.data;
   };
 
