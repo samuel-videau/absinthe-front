@@ -1,11 +1,12 @@
 'use client'
 
+import Modal from "@/components/modal";
 import { useApi } from "@/libs/useApi";
 import { STORAGE_KEY, useLocalStorage } from "@/libs/useLocalStorage";
 import { Campaign } from "@/types/campaign";
 import { KEY_PERMISSION } from "@/types/key";
 import { FormEvent, Key, useState, useEffect } from "react";
-import { Points, AbsintheSdk } from 'sam-absinthe-sdk';
+import { AbsintheSdk } from 'sam-absinthe-sdk';
 
 export default function Home() {
   const [keyData, setKeyData] = useState<Partial<Key>>();
@@ -23,6 +24,8 @@ export default function Home() {
     eventName: '',
     metadata: ''
   });
+
+  const [modal, setModal] = useState<{ type:'success' | 'error', title: string, message: string } | null>(null);
 
   const isConnected = () => !!userId;
 
@@ -90,10 +93,12 @@ export default function Home() {
 
   const handlePointsSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setLoading(true);
 
     const { campaignId, apiKey, address, points, eventName, metadata } = pointsForm;
     if (!campaignId || !apiKey || !address || !points || !eventName) return;
+
+    setLoading(true);
+
 
     try {
       const absintheSdk = new AbsintheSdk(apiKey, Number(campaignId));
@@ -113,8 +118,10 @@ export default function Home() {
         eventName: '',
         metadata: ''
       });
+      setModal({ type: 'success', title: 'Success', message: 'Points successfully added!' });
     } catch (error) {
       console.error("Failed to add points:", error);
+      setModal({ type: 'error', title: 'Error', message: 'Failed to add points. Please try again.' });
     }
 
     setLoading(false);
@@ -125,6 +132,10 @@ export default function Home() {
     setPointsForm(prevState => ({ ...prevState, [name]: value }));
   };
 
+  const closeModal = () => {
+    setModal(null);
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-100 flex flex-col items-center">
       {loading && (
@@ -132,6 +143,8 @@ export default function Home() {
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
         </div>
       )}
+
+      {modal && <Modal type={modal.type} title={modal.title} message={modal.message} onClose={closeModal} />}
 
       <header className="bg-blue-600 w-full py-4 text-white flex justify-center">
         <div className="flex items-center space-x-2">
@@ -225,6 +238,7 @@ export default function Home() {
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                  disabled={loading || !pointsForm.campaignId || !pointsForm.apiKey || !pointsForm.address || !pointsForm.points || !pointsForm.eventName}
                 >
                   Add Points
                 </button>
