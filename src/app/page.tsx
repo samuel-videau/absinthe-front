@@ -14,6 +14,8 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
   const isConnected = () => !!userId;
 
   const { createUser, createCampaign } = useApi();
@@ -32,6 +34,7 @@ export default function Home() {
   }, []);
 
   const handleConnect = async () => {
+    setLoading(true);
     if (!isConnected()) {
       try {
         const user = await createUser();
@@ -42,12 +45,16 @@ export default function Home() {
       }
     } else {
       setUserId(null);
+      setCampaignId(null);
+      setValue(STORAGE_KEY.USER_ID, '');
     }
+    setLoading(false);
   };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!isConnected() || !campaignName) return;
+    setLoading(true);
 
     try {
       const campaign = await createCampaign({ name: campaignName, userId: userId!, startDate: new Date() });
@@ -56,10 +63,18 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to create campaign:", error);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+    <div className="relative min-h-screen bg-gray-100 flex flex-col items-center">
+      {loading && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+        </div>
+      )}
+
       <header className="bg-blue-600 w-full py-4 text-white flex justify-center">
         <div className="flex items-center space-x-2">
           <div className={`w-4 h-4 rounded-full ${isConnected() ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -100,6 +115,22 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      <style jsx>{`
+        .loader {
+          border-top-color: #3498db;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }
