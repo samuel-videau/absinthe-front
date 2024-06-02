@@ -3,6 +3,7 @@
 import { useApi } from "@/libs/useApi";
 import { STORAGE_KEY, useLocalStorage } from "@/libs/useLocalStorage";
 import { Campaign } from "@/types/campaign";
+import { KEY_PERMISSION } from "@/types/key";
 import { FormEvent, Key, useState, useEffect } from "react";
 import { Points, AbsintheSdk } from 'sam-absinthe-sdk';
 
@@ -15,10 +16,11 @@ export default function Home() {
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   const isConnected = () => !!userId;
 
-  const { createUser, createCampaign } = useApi();
+  const { createUser, createCampaign, createKey } = useApi();
   const { getValue, setValue } = useLocalStorage();
 
   useEffect(() => {
@@ -67,6 +69,19 @@ export default function Home() {
     setLoading(false);
   };
 
+  const handleCreateKey = async () => {
+    setLoading(true);
+
+    try {
+      const keyResponse = await createKey({ permissions: [KEY_PERMISSION.FULL], userId: userId! });
+      setApiKey(keyResponse.apiKey);
+    } catch (error) {
+      console.error("Failed to create key:", error);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-100 flex flex-col items-center">
       {loading && (
@@ -90,28 +105,43 @@ export default function Home() {
 
       <main className="container mx-auto p-4 flex flex-col items-center">
         {isConnected() && (
-          <form onSubmit={handleSubmit} className="mt-4 w-full max-w-md">
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                placeholder="Campaign Name"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                className="px-4 py-2 border rounded w-full text-black"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
-              >
-                Create Campaign
-              </button>
-            </div>
-          </form>
+          <>
+            <form onSubmit={handleSubmit} className="mt-4 w-full max-w-md">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Campaign Name"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  className="px-4 py-2 border rounded w-full text-black"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
+                >
+                  Create Campaign
+                </button>
+              </div>
+            </form>
+            <button
+              onClick={handleCreateKey}
+              className="mt-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-700"
+            >
+              Create Key (Full Permissions)
+            </button>
+          </>
         )}
 
         {campaignId && (
           <div className="mt-4 bg-white p-4 rounded shadow w-full max-w-md">
             <p className="text-gray-700">Campaign ID: {campaignId}</p>
+          </div>
+        )}
+
+        {apiKey && (
+          <div className="mt-4 bg-white p-4 rounded shadow w-full max-w-md">
+            <p className="text-gray-700">API Key:</p>
+            <p className="break-all whitespace-pre-wrap text-xs text-slate-400">{apiKey}</p>
           </div>
         )}
       </main>

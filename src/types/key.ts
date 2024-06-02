@@ -1,3 +1,6 @@
+import { Campaign } from "./campaign";
+import { User } from "./user";
+
 export interface Key {
   id: string;
   hashedKey: string;
