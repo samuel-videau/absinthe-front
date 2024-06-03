@@ -31,7 +31,7 @@ export default function Campaigns() {
     if (userId) {
       fetchCampaigns();
     }
-  }, [userId, findAllCampaigns]);
+  }, [userId]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();

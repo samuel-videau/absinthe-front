@@ -76,7 +76,7 @@ export default function CampaignPage() {
       setModal({ type: 'success', title: 'Success', message: 'Points successfully added!' });
     } catch (error: any) {
       console.error("Failed to add points:", error);
-      setModal({ type: 'error', title: 'Failed to add points.', message: error.response.data.message });
+      setModal({ type: 'error', title: 'Failed to add points.', message: error.response ? error.response.data.message : '' });
     }
 
     setLoading(false);
@@ -98,7 +98,7 @@ export default function CampaignPage() {
       setPoints(pointsResponse);
     } catch (error: any) {
       console.error("Failed to find points:", error);
-      setModal({ type: 'error', title: 'Failed to find points.', message: error.response.data.message });
+      setModal({ type: 'error', title: 'Failed to find points.', message: error.response ? error.response.data.message : '' });
     }
 
     setLoading(false);
