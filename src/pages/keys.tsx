@@ -12,7 +12,7 @@ export default function Keys() {
   const [endDate, setEndDate] = useState<string>("");
   const [campaignId, setCampaignId] = useState<string>("");
   const [permissions, setPermissions] = useState<KEY_PERMISSION[]>([KEY_PERMISSION.FULL]);
-  const [modal, setModal] = useState<{ type: 'success' | 'error', title: string, message: string } | null>(null);
+  const [modal, setModal] = useState<{ type: 'success' | 'error', title: string, message: string, subMessage?: string } | null>(null);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
   const user = useAppSelector((state) => state.user);
@@ -43,7 +43,7 @@ export default function Keys() {
         userId: user.id,
         campaignId: campaignId ? parseInt(campaignId) : undefined,
       });
-      setModal({ type: 'success', title: 'Success', message: 'API Key successfully created!' });
+      setModal({ type: 'success', title: 'API Key successfully created!', message: `Copy this key, you won't be able to get it back.`, subMessage: keyResponse.apiKey});
       setCampaignId("");
       setPermissions([KEY_PERMISSION.FULL]);
       setEndDate("");
@@ -71,7 +71,7 @@ export default function Keys() {
 
   return (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
-      {modal && <Modal type={modal.type} title={modal.title} message={modal.message} onClose={closeModal} />}
+      {modal && <Modal type={modal.type} title={modal.title} message={modal.message} subMessage={modal.subMessage} onClose={closeModal} />}
 
       <h2 className="text-2xl font-semibold mb-4 text-center">Your API Keys</h2>
       

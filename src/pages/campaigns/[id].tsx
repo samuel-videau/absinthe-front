@@ -5,22 +5,28 @@ import { useRouter } from "next/router";
 import Modal from "@/components/modal";
 import { useApi } from "@/libs/useApi";
 import { Campaign, CAMPAIGN_STATUS } from "@/types/campaign";
-import { AbsintheSdk } from 'sam-absinthe-sdk';
+import { AbsintheSdk, Points } from 'sam-absinthe-sdk';
 import { useAppSelector } from "@/store/hooks";
 import { API_URL } from "@/globals";
 
-export default function Campaign() {
+export default function CampaignPage() {
   const router = useRouter();
   const { id } = router.query;
   const userId = useAppSelector((state) => state.user.id);
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [points, setPoints] = useState<Points[]>([]); 
   const [pointsForm, setPointsForm] = useState({
     apiKey: '',
     address: '',
     points: '',
     eventName: '',
     metadata: ''
+  });
+  const [searchForm, setSearchForm] = useState({
+    apiKey: '',
+    address: '',
+    eventName: ''
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<{ type: 'success' | 'error', title: string, message: string } | null>(null);
@@ -40,13 +46,13 @@ export default function Campaign() {
       }
     };
     fetchCampaign();
-  }, [id, findCampaign]);
+  }, [id]);
 
   const handlePointsSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     const { apiKey, address, points, eventName, metadata } = pointsForm;
-    if ( !apiKey || !address || !points || !eventName) return;
+    if (!apiKey || !address || !points || !eventName) return;
 
     setLoading(true);
 
@@ -58,7 +64,7 @@ export default function Campaign() {
         eventName,
         metadata: metadata ? JSON.parse(metadata) : undefined
       };
-      const pointsResponse = await absintheSdk.distribute("points", pointsData);
+      const pointsResponse = await absintheSdk.distribute(pointsData.eventName, pointsData);
       console.log("Points Response:", pointsResponse);
       setPointsForm({
         apiKey: pointsForm.apiKey,
@@ -68,13 +74,34 @@ export default function Campaign() {
         metadata: ''
       });
       setModal({ type: 'success', title: 'Success', message: 'Points successfully added!' });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to add points:", error);
-      setModal({ type: 'error', title: 'Error', message: 'Failed to add points. Please try again.' });
+      setModal({ type: 'error', title: 'Failed to add points.', message: error.response.data.message });
     }
 
     setLoading(false);
     setIsFormOpen(false);
+  };
+
+  const findPoints = async (event: FormEvent) => {
+    event.preventDefault();
+    const { apiKey, address, eventName } = searchForm;
+
+    if (!apiKey || !address) return;
+
+    setLoading(true);
+
+    try {
+      const absintheSdk = new AbsintheSdk(apiKey, Number(id), API_URL);
+      const pointsResponse = await absintheSdk.getPoints(address, eventName);
+      console.log("Points Response:", pointsResponse);
+      setPoints(pointsResponse);
+    } catch (error: any) {
+      console.error("Failed to find points:", error);
+      setModal({ type: 'error', title: 'Failed to find points.', message: error.response.data.message });
+    }
+
+    setLoading(false);
   };
 
   const handleStatusToggle = async () => {
@@ -93,6 +120,11 @@ export default function Campaign() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setPointsForm(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSearchForm(prevState => ({ ...prevState, [name]: value }));
   };
 
   const closeModal = () => {
@@ -121,6 +153,61 @@ export default function Campaign() {
         </div>
       ) : (
         <p className="text-gray-700">Loading campaign details...</p>
+      )}
+
+      <form onSubmit={findPoints} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg mt-4">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Find Points</h2>
+        <div className="flex flex-col space-y-2">
+          <input
+            type="text"
+            name="apiKey"
+            placeholder="API Key"
+            value={searchForm.apiKey}
+            onChange={handleSearchInputChange}
+            className="px-4 py-2 border rounded w-full text-black"
+          />
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={searchForm.address}
+            onChange={handleSearchInputChange}
+            className="px-4 py-2 border rounded w-full text-black"
+          />
+          <input
+            type="text"
+            name="eventName"
+            placeholder="Event Name (Optional)"
+            value={searchForm.eventName}
+            onChange={handleSearchInputChange}
+            className="px-4 py-2 border rounded w-full text-black"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            disabled={loading || !searchForm.apiKey || !searchForm.address}
+          >
+            {loading ? "Searching..." : "Search"}
+          </button>
+        </div>
+      </form>
+
+      {points.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg mt-4">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Points Results</h2>
+          <ul>
+            {points.map(point => (
+              <li key={point.id} className="bg-gray-50 p-4 rounded shadow mb-2 text-sm text-slate-700">
+                <p><strong>ID:</strong> {point.id}</p>
+                <p><strong>Address:</strong> {point.address}</p>
+                <p><strong>Points:</strong> {point.points}</p>
+                <p><strong>Event Name:</strong> {point.eventName}</p>
+                <p><strong>Metadata:</strong> {point.metadata}</p>
+                <p><strong>Created At:</strong> {new Date(point.createdAt).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <button
@@ -178,7 +265,7 @@ export default function Campaign() {
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                   disabled={loading || !pointsForm.apiKey || !pointsForm.address || !pointsForm.points || !pointsForm.eventName}
                 >
                   {loading ? "Adding Points..." : "Add Points"}
