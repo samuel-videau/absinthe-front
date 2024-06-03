@@ -1,13 +1,16 @@
 'use client'
 
 import { FormEvent, useState } from "react";
+import { useAppSelector } from "@/store/hooks";
 import { useApi } from "@/libs/useApi";
 
-export default function Campaigns({ userId }: {userId: string}) {
+export default function Campaigns() {
   const [campaignName, setCampaignName] = useState<string>("");
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const { createCampaign } = useApi();
+
+  const userId = useAppSelector((state) => state.user.id);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_URL } from "@/globals";
 import { User } from "@/types/user";
-import { CreateKey, CreateKeyResponse } from '@/types/key';
+import { CreateKey, CreateKeyResponse, Key } from '@/types/key';
 import { CreateCampaign, UpdateCampaign } from '@/types/campaign';
 
 export const useApi = () => {
@@ -12,7 +12,7 @@ export const useApi = () => {
     return response.data;
   };
 
-  const createKey = async (keyData: CreateKey) => {
+  const createKey = async (keyData: CreateKey): Promise<CreateKeyResponse> => {
     const response = await axios.post<CreateKeyResponse>(`${apiUrl}/keys`, keyData, {
       headers: {
         'Content-Type': 'application/json',
@@ -20,6 +20,14 @@ export const useApi = () => {
     });
     return response.data;
   };
+
+
+  const findKeys = async (userId: string, campaignId?: number): Promise<Key[]> => {
+    const response = await axios.get<Key[]>(`${apiUrl}/keys`, {
+      params: { userId, campaignId },
+    });
+    return response.data;
+  }
 
   const createCampaign = async (campaignData: CreateCampaign) => {
     const response = await axios.post(`${apiUrl}/campaigns`, campaignData, {
@@ -52,5 +60,6 @@ export const useApi = () => {
     createCampaign,
     findAllCampaigns,
     updateCampaign,
+    findKeys
   };
 };
