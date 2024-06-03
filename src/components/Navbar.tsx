@@ -35,6 +35,7 @@ export default function Navbar() {
         const user = await createUser();
         setUserId(user.id);
         setValue(STORAGE_KEY.USER_ID, user.id);
+        dispatch(setUser({id: user.id}));
       } catch (error) {
         console.error("Failed to create account:", error);
         setModal({ type: 'error', title: 'Failed to create account', message: 'There was an error creating your account. Please try again.' });
