@@ -45,6 +45,11 @@ export const useApi = () => {
     return response.data;
   };
 
+  const findCampaign = async (campaignId: number): Promise<Campaign> => {
+    const response = await axios.get<Campaign>(`${apiUrl}/campaigns/${campaignId}`);
+    return response.data;
+  }
+
   const updateCampaign = async (campaignId: number, campaignData: UpdateCampaign) => {
     const response = await axios.patch(`${apiUrl}/campaigns/${campaignId}`, campaignData, {
       headers: {
@@ -59,6 +64,7 @@ export const useApi = () => {
     createKey,
     createCampaign,
     findAllCampaigns,
+    findCampaign,
     updateCampaign,
     findKeys
   };

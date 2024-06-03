@@ -5,6 +5,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useApi } from "@/libs/useApi";
 import Modal from "@/components/modal";
 import { Campaign, CAMPAIGN_STATUS } from "@/types/campaign";
+import router from "next/router";
 
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -41,7 +42,7 @@ export default function Campaigns() {
       const campaign = await createCampaign({
         name: campaignName,
         userId,
-        startDate: startDate ? new Date(startDate) : undefined,
+        startDate: startDate ? new Date(startDate) : new Date(),
         endDate: endDate ? new Date(endDate) : undefined,
       });
       setCampaigns((prevCampaigns) => [...prevCampaigns, campaign]);
@@ -76,6 +77,10 @@ export default function Campaigns() {
     setModal(null);
   };
 
+  const navToCampaign = (id: string) => {
+    router.push(`/campaigns/${id}`);
+  }
+
   return (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
       {modal && <Modal type={modal.type} title={modal.title} message={modal.message} onClose={closeModal} />}
@@ -88,7 +93,9 @@ export default function Campaigns() {
         ) : (
           <ul className="space-y-2">
             {campaigns.map((campaign) => (
-              <li key={campaign.id} className="bg-gray-50 p-4 rounded shadow text-sm text-slate-700">
+              //clickable
+              <li key={campaign.id}>
+                <div onClick={() => navToCampaign(campaign.id.toString())} className="bg-gray-50 p-4 rounded shadow text-sm text-slate-700 hover:bg-gray-100 cursor-pointer">
                 <p><strong>ID:</strong> {campaign.id}</p>
                 <p><strong>Name:</strong> {campaign.name}</p>
                 <p><strong>Created At:</strong> {new Date(campaign.createdAt).toLocaleString()}</p>
@@ -101,6 +108,7 @@ export default function Campaigns() {
                 >
                   {campaign.status === CAMPAIGN_STATUS.ON ? 'Turn Off' : 'Turn On'}
                 </button>
+                </div>
               </li>
             ))}
           </ul>

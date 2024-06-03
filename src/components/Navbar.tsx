@@ -45,7 +45,6 @@ export default function Navbar() {
       <div className="flex space-x-4">
         <Link href="/campaigns" className="hover:underline">Campaigns</Link>
         <Link href="/keys" className="hover:underline">Keys</Link>
-        <Link href="/points" className="hover:underline">Points</Link>
       </div>
       <button
         onClick={handleConnect}
