@@ -81,15 +81,13 @@ export default function Campaigns() {
     router.push(`/campaigns/${id}`);
   }
 
-  if (!userId) {
-    return (
-      <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
-        <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>
-      </div>
-    );
-  }
-
-  return (
+  return userId ? 
+  (
+    <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
+      <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>
+    </div>
+  ) :
+  (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
       {modal && <Modal type={modal.type} title={modal.title} message={modal.message} onClose={closeModal} />}
 
