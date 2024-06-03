@@ -2,6 +2,8 @@ import "@/globals.css";
 import Navbar from "@/components/Navbar";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { Provider } from "react-redux";
+import { store } from "@/store/store";
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -18,8 +20,11 @@ export default function App({ Component, pageProps }: AppProps) {
     
 
     
+        <Provider store={store}>
           <Navbar />
+        
             <Component {...pageProps}  />
+            </Provider>
     </>
   );
 }

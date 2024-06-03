@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useLocalStorage, STORAGE_KEY } from '@/libs/useLocalStorage';
 import { useApi } from "@/libs/useApi";
+import { setUser } from '@/store/user-reducer';
+import { useAppDispatch } from '@/store/hooks';
 
 export default function Navbar() {
   const [userId, setUserId] = useState<string | null>(null);
   const { createUser } = useApi();
   const { getValue, setValue } = useLocalStorage();
+  const dispatch = useAppDispatch();
 
   const isConnected = () => !!userId;
 
@@ -15,6 +18,8 @@ export default function Navbar() {
       const userId = getValue(STORAGE_KEY.USER_ID);
       if (userId) {
         setUserId(userId);
+        dispatch(setUser({id: userId}));
+        console.log("User ID:", userId);
       }
     };
     init();

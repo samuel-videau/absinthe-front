@@ -25,7 +25,7 @@ export default function Points() {
     setLoading(true);
 
     try {
-      const absintheSdk = new AbsintheSdk(apiKey, Number(campaignId));
+      const absintheSdk = new AbsintheSdk(apiKey, Number(campaignId), 'http://localhost:3001');
       const pointsData = {
         points: Number(points),
         address,
