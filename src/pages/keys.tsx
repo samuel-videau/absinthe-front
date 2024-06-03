@@ -25,7 +25,7 @@ export default function Keys() {
 
   const fetchKeys = async () => {
     try {
-        console.log("Fetching keys for user:", user.id);
+      console.log("Fetching keys for user:", user.id);
       const keysResponse = await findKeys(user.id);
       setKeys(keysResponse);
     } catch (error) {
@@ -43,7 +43,7 @@ export default function Keys() {
         userId: user.id,
         campaignId: campaignId ? parseInt(campaignId) : undefined,
       });
-      setModal({ type: 'success', title: 'API Key successfully created!', message: `Copy this key, you won't be able to get it back.`, subMessage: keyResponse.apiKey});
+      setModal({ type: 'success', title: 'API Key successfully created!', message: `Copy this key, you won't be able to get it back.`, subMessage: keyResponse.apiKey });
       setCampaignId("");
       setPermissions([KEY_PERMISSION.FULL]);
       setEndDate("");
@@ -68,6 +68,14 @@ export default function Keys() {
   const closeModal = () => {
     setModal(null);
   };
+
+  if (!user.id) {
+    return (
+      <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
+        <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">

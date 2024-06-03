@@ -81,6 +81,14 @@ export default function Campaigns() {
     router.push(`/campaigns/${id}`);
   }
 
+  if (!userId) {
+    return (
+      <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
+        <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
       {modal && <Modal type={modal.type} title={modal.title} message={modal.message} onClose={closeModal} />}
@@ -93,21 +101,20 @@ export default function Campaigns() {
         ) : (
           <ul className="space-y-2">
             {campaigns.map((campaign) => (
-              //clickable
               <li key={campaign.id}>
                 <div onClick={() => navToCampaign(campaign.id.toString())} className="bg-gray-50 p-4 rounded shadow text-sm text-slate-700 hover:bg-gray-100 cursor-pointer">
-                <p><strong>ID:</strong> {campaign.id}</p>
-                <p><strong>Name:</strong> {campaign.name}</p>
-                <p><strong>Created At:</strong> {new Date(campaign.createdAt).toLocaleString()}</p>
-                <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
-                <p><strong>End Date:</strong> {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}</p>
-                <p><strong>Status:</strong> {CAMPAIGN_STATUS[campaign.status]}</p>
-                <button
-                  onClick={() => handleStatusToggle(campaign)}
-                  className={`mt-2 px-4 py-2 rounded text-white ${campaign.status === CAMPAIGN_STATUS.ON ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'}`}
-                >
-                  {campaign.status === CAMPAIGN_STATUS.ON ? 'Turn Off' : 'Turn On'}
-                </button>
+                  <p><strong>ID:</strong> {campaign.id}</p>
+                  <p><strong>Name:</strong> {campaign.name}</p>
+                  <p><strong>Created At:</strong> {new Date(campaign.createdAt).toLocaleString()}</p>
+                  <p><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</p>
+                  <p><strong>End Date:</strong> {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}</p>
+                  <p><strong>Status:</strong> {CAMPAIGN_STATUS[campaign.status]}</p>
+                  <button
+                    onClick={() => handleStatusToggle(campaign)}
+                    className={`mt-2 px-4 py-2 rounded text-white ${campaign.status === CAMPAIGN_STATUS.ON ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'}`}
+                  >
+                    {campaign.status === CAMPAIGN_STATUS.ON ? 'Turn Off' : 'Turn On'}
+                  </button>
                 </div>
               </li>
             ))}
