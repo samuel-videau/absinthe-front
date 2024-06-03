@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { API_URL } from "@/globals";
 import { User } from "@/types/user";
-import { CreateKey, CreateKeyResponse } from '@/types/key';
-import { CreateCampaign, UpdateCampaign } from '@/types/campaign';
+import { CreateKey, CreateKeyResponse, Key } from '@/types/key';
+import { Campaign, CreateCampaign, UpdateCampaign } from '@/types/campaign';
 
 export const useApi = () => {
   const apiUrl = API_URL;
@@ -12,7 +12,7 @@ export const useApi = () => {
     return response.data;
   };
 
-  const createKey = async (keyData: CreateKey) => {
+  const createKey = async (keyData: CreateKey): Promise<CreateKeyResponse> => {
     const response = await axios.post<CreateKeyResponse>(`${apiUrl}/keys`, keyData, {
       headers: {
         'Content-Type': 'application/json',
@@ -20,6 +20,14 @@ export const useApi = () => {
     });
     return response.data;
   };
+
+
+  const findKeys = async (userId: string, campaignId?: number): Promise<Key[]> => {
+    const response = await axios.get<Key[]>(`${apiUrl}/keys`, {
+      params: { userId, campaignId },
+    });
+    return response.data;
+  }
 
   const createCampaign = async (campaignData: CreateCampaign) => {
     const response = await axios.post(`${apiUrl}/campaigns`, campaignData, {
@@ -30,12 +38,17 @@ export const useApi = () => {
     return response.data;
   };
 
-  const findAllCampaigns = async (userId: string) => {
-    const response = await axios.get(`${apiUrl}/campaigns`, {
+  const findAllCampaigns = async (userId: string): Promise<Campaign[]> => {
+    const response = await axios.get<Campaign[]>(`${apiUrl}/campaigns`, {
       params: { userId },
     });
     return response.data;
   };
+
+  const findCampaign = async (campaignId: number): Promise<Campaign> => {
+    const response = await axios.get<Campaign>(`${apiUrl}/campaigns/${campaignId}`);
+    return response.data;
+  }
 
   const updateCampaign = async (campaignId: number, campaignData: UpdateCampaign) => {
     const response = await axios.patch(`${apiUrl}/campaigns/${campaignId}`, campaignData, {
@@ -51,6 +64,8 @@ export const useApi = () => {
     createKey,
     createCampaign,
     findAllCampaigns,
+    findCampaign,
     updateCampaign,
+    findKeys
   };
 };
