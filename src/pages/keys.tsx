@@ -69,7 +69,7 @@ export default function Keys() {
     setModal(null);
   };
 
-  return user.id ?
+  return !user.id ?
   (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
       <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>

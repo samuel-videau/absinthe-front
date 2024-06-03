@@ -81,7 +81,7 @@ export default function Campaigns() {
     router.push(`/campaigns/${id}`);
   }
 
-  return userId ? 
+  return !userId ? 
   (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100">
       <h2 className="text-2xl font-semibold mb-4 text-center">You need to create an account to use the page</h2>
