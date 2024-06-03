@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from "@/globals";
 import { User } from "@/types/user";
 import { CreateKey, CreateKeyResponse, Key } from '@/types/key';
-import { CreateCampaign, UpdateCampaign } from '@/types/campaign';
+import { Campaign, CreateCampaign, UpdateCampaign } from '@/types/campaign';
 
 export const useApi = () => {
   const apiUrl = API_URL;
@@ -38,8 +38,8 @@ export const useApi = () => {
     return response.data;
   };
 
-  const findAllCampaigns = async (userId: string) => {
-    const response = await axios.get(`${apiUrl}/campaigns`, {
+  const findAllCampaigns = async (userId: string): Promise<Campaign[]> => {
+    const response = await axios.get<Campaign[]>(`${apiUrl}/campaigns`, {
       params: { userId },
     });
     return response.data;
